@@ -1,6 +1,8 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import mongoose, {HydratedDocument, Types} from 'mongoose';
 import {Category} from "../../category/schemas/category.schema";
+import {Feature} from "../../feature/schemas/feature.schema";
+import {Ingredient} from "../../ingredient/schemas/ingredient.schema";
 
 export type ProductDocument = HydratedDocument<Product>;
 
@@ -31,18 +33,16 @@ export class Product {
     category: Category;
 
     @Prop({
-        type: [{
-            type: Types.ObjectId,
-            ref: "Ingredient"
-        }]
+        type: [Types.ObjectId],
+        ref: Ingredient.name
     })
-    ingredients: Types.Array<Types.ObjectId>;
+    ingredients: Ingredient[];
 
     @Prop({
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Feature'
+        type: [Types.ObjectId],
+        ref: Feature.name
     })
-    features: Types.Array<Types.ObjectId>;
+    features: Feature[];
 
     // @Prop({
     //     type: mongoose.Schema.Types.ObjectId,
