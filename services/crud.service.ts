@@ -1,5 +1,6 @@
 import {Model} from 'mongoose';
 import {UPLOAD_PATH} from "../constants/global.constant";
+import {UploadStorage} from "../utilities/upload-storage.utility";
 
 export class CrudService<T> {
     constructor(private readonly model: Model<T>) {
@@ -14,7 +15,9 @@ export class CrudService<T> {
         const fileFields = {};
 
         for (const item of files) {
-            fileFields[item.field] = `${UPLOAD_PATH.absolute}/${item.file.filename}`;
+            const uploadStorage = new UploadStorage(item.file);
+            const {fileName} = uploadStorage.save();
+            fileFields[item.field] = `${UPLOAD_PATH.absolute}/${fileName}`;
         }
 
         const createdDocument = new this.model({
