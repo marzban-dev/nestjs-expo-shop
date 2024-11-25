@@ -1,11 +1,10 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, UploadedFile} from '@nestjs/common';
 import {IngredientService} from './ingredient.service';
 import {CreateIngredientDto} from './dto/create-ingredient.dto';
-import {UpdateIngredientDto} from './dto/update-ingredient.dto';
-import {ApiBody, ApiConsumes, ApiTags} from "@nestjs/swagger";
-import {FileInterceptor} from "@nestjs/platform-express";
-import {multerConfig} from "../../configs/multer.config";
+import {ApiTags} from "@nestjs/swagger";
 import {FileUpload} from "../../decorators/file-upload.decorator";
+import {imageFileValidation} from "../../validations/file.validation";
+import {UploadStorage} from "../../utilities/upload-storage.utility";
 
 @ApiTags('Ingredient')
 @Controller('ingredient')
@@ -15,17 +14,29 @@ export class IngredientController {
 
     @Post()
     @FileUpload("photo", CreateIngredientDto)
-    create(
+    async create(
         @Body() createIngredientDto: CreateIngredientDto,
-        @UploadedFile() photo: Express.Multer.File
+        @UploadedFile(imageFileValidation) photo: Express.Multer.File
     ) {
         return this.ingredientService.createWithMedia(createIngredientDto, [{
             file: photo, field: "photo"
         }]);
     }
 
+    @Delete(":id")
+    async delete(@Param('id') id: string) {
+        const deletedItem = await this.ingredientService.delete(id);
+        await UploadStorage.delete("." + deletedItem.photo);
+        return deletedItem;
+    }
+
     @Get()
     findAll() {
         return this.ingredientService.findAll();
+    }
+
+    @Get(":id")
+    findOne(@Param('id') id: string) {
+        return this.ingredientService.findOne(id);
     }
 }
